@@ -39,8 +39,6 @@ import { exec } from 'child_process';
 
 import path from 'path';
 
-import settings from '../settings.js';
-
 // Helper function to download media
 
 async function downloadMedia(quotedMsg, mediaType) {
@@ -388,7 +386,7 @@ export default [
 
             if (!media || media.type !== 'video') {
 
-                return context.reply('*Reply to a video file!*');
+                return context.reply('Reply to a video file!');
 
             }
 
