@@ -292,5 +292,213 @@ export default [
 
     }
 
+},
+        {
+        name: 'prefix',
+
+        aliases: [],
+
+        category: 'TOOLS MENU',
+
+        description: 'Check current bot prefix',
+
+        usage: '.prefix',
+
+        execute: async (sock, message, args, context) => {
+
+            try {
+
+                const { reply, react } = context;
+
+                
+
+                await react('📋');
+
+                
+
+                // Get current prefix from global (which reads from settings/database)
+
+                const currentPrefix = global.prefix || '.';
+
+                
+
+                // Get prefix from database to ensure consistency
+
+                const dbPrefix = getSetting('prefix', '.');
+
+                
+
+                const prefixInfo = `Current Bot Prefix\n\nActive Prefix: ${currentPrefix}\nDatabase Prefix: ${dbPrefix}\n\nTo change prefix: .setprefix \nTo remove prefix: .setprefix none`;
+
+                
+
+                await reply(prefixInfo,{quoted: global.prfx});
+
+                
+
+            } catch (error) {
+
+                console.error('Error in prefix command:', error);
+
+                await context.reply('Error getting prefix information.');
+
+            }
+
+        }
+
+    },
+
+    {
+
+        name: 'setprefix',
+
+        aliases: ['changeprefix', 'newprefix'],
+
+        category: 'TOOLS MENU',
+
+        description: 'Change bot prefix',
+
+        usage: '.setprefix <new_prefix> | .setprefix none',
+
+        execute: async (sock, message, args, context) => {
+
+            try {
+
+                const { reply, react, senderIsSudo } = context;
+
+                const senderId = message.key.participant || message.key.remoteJid;
+
+                
+
+                // Check if user is owner/sudo
+
+                if (!senderIsSudo && !message.key.fromMe) {
+
+                    await react('❌');
+
+                    return await reply('Only the bot owner can change the prefix.',{quoted: global.setprefix});
+
+                }
+
+                
+
+                // Get new prefix from args
+
+                const newPrefix = args.slice(1).join(' ').trim();
+
+                
+
+                if (!newPrefix) {
+
+                    await react('❌');
+
+                    return await reply('Please provide a new prefix.\n\nUsage:\n• .setprefix ! - Set prefix to !\n• .setprefix none - Remove prefix\n• .setprefix 0 - Remove prefix',{quoted: global.setprefix});
+
+                }
+
+                
+
+                let finalPrefix;
+
+                let statusMessage;
+
+                
+
+                // Handle special cases for removing prefix
+
+                if (newPrefix.toLowerCase() === 'none' || newPrefix === 'null' || newPrefix === '0') {
+
+                    finalPrefix = '';
+
+                    statusMessage = 'Prefix removed! Commands can now be used without any prefix.';
+
+                } else {
+
+                    // Validate prefix length
+
+                    if (newPrefix.length > 5) {
+
+                        await react('❌');
+
+                        return await reply('Prefix cannot be longer than 5 characters.',{quoted: global.setprefix});
+
+                    }
+
+                    
+
+                    // Check for problematic characters
+
+                    if (newPrefix.includes('@') || newPrefix.includes('#')) {
+
+                        await react('❌');
+
+                        return await reply('Prefix cannot contain @ or # symbols.',{quoted: global.setprefix});
+
+                    }
+
+                    
+
+                    finalPrefix = newPrefix;
+
+                    statusMessage = `Prefix changed successfully!\n\nNew prefix: ${finalPrefix}\nExample: ${finalPrefix}menu`;
+
+                }
+
+                
+
+                await react('⏳');
+
+                
+
+                // Update in database
+
+                const dbUpdateSuccess = updateSetting('prefix', finalPrefix);
+
+                
+
+                if (dbUpdateSuccess) {
+
+                    // Update global variable immediately
+
+global.prefix = finalPrefix;
+global.initializeGlobals();
+                    
+
+                    await react('✅');
+
+                    
+
+                    const responseMessage = `Prefix Update Successful\n\n${statusMessage}\n\nChanges are now active for all commands.`;
+
+                    
+
+                    await reply(responseMessage,{quoted: global.setprefix});
+
+                    
+
+                    console.log(`🔧 Prefix changed to: "${finalPrefix}" by ${senderId}`);
+
+                } else {
+
+                    await react('❌');
+
+                    await reply('Failed to update prefix in database. Please try again.',{quoted: global.setprefix});
+
+                }
+
+                
+
+            } catch (error) {
+
+                console.error('Error in setprefix command:', error);
+
+                await context.react('❌');
+
+                await context.reply('Error changing prefix. Please try again.',{quoted: global.setprefix});
+
+            }
+
+        }
+
 }
 ];
