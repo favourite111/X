@@ -19,8 +19,11 @@ const setownername = {
             return reply('⚠️ Owner Only Command!');
         }
 
-        // 🔑 Normalize args (same pattern as setfont)
-        const cleanArgs = args[0] === 'setownername' ? args.slice(1) : args;
+        // 🔑 Normalize args (handles aliases correctly)
+        const ownerCmds = ['setownername', 'setowner', 'ownername'];
+        const cleanArgs = ownerCmds.includes(args[0]?.toLowerCase())
+            ? args.slice(1)
+            : args;
 
         if (cleanArgs.length === 0) {
             const currentOwner = getSetting('botOwner', 'Not Set');
@@ -90,8 +93,11 @@ const setbotname = {
             return reply('⚠️ Owner Only Command!');
         }
 
-        // 🔑 Normalize args (same pattern as setfont)
-        const cleanArgs = args[0] === 'setbotname' ? args.slice(1) : args;
+        // 🔑 Normalize args (handles aliases correctly)
+        const botCmds = ['setbotname', 'botname', 'setbot'];
+        const cleanArgs = botCmds.includes(args[0]?.toLowerCase())
+            ? args.slice(1)
+            : args;
 
         if (cleanArgs.length === 0) {
             const currentBotName = getSetting('botName', 'Gift-X');
