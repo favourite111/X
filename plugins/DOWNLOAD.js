@@ -396,7 +396,7 @@ execute: async (sock, message, args, context) => {
 
         if (response.status !== 200 || !data.result || data.result.length === 0) {
 
-          return context.reply("*No images found or API error. Please try again later or try another query!*");
+          return context.reply("No images found or API error. Please try again later or try another query!");
 
         } else {
 
@@ -444,7 +444,7 @@ execute: async (sock, message, args, context) => {
 
       const text = args.slice(1).join(' ');
 
-      if (!text) return context.reply('*Please provide an Instagram URL!*');
+      if (!text) return context.reply('Please provide an Instagram URL!');
 
       const apiUrl = `https://api.siputzx.my.id/api/d/igdl?url=${encodeURIComponent(text)}`;
 
@@ -496,7 +496,7 @@ execute: async (sock, message, args, context) => {
 
       const text = args.slice(1).join(' ');
 
-      if (!text) return context.reply("*Please provide a song name*");
+      if (!text) return context.reply("Please provide a song name");
 
       
 
@@ -506,7 +506,7 @@ execute: async (sock, message, args, context) => {
 
         if (!res.ok) {
 
-          throw new Error(`*API request failed with status ${res.status}*`);
+          throw new Error(`API request failed with status ${res.status}`);
 
         }
 
@@ -723,10 +723,7 @@ await context.replyPlain({
 Reply with:
 🇦 - For Audio Format 🎵
 🇩 - For Document Format 📄
-🇻 - For Voice Note Format 🎤
-
-Or React:
-🎵 - Audio | 📄 - Document | 🎤 - Voice`
+🇻 - For Voice Note Format 🎤`
 }, { quoted: msg });
 
 // Store download info for follow-up
@@ -977,7 +974,7 @@ global.playQueue[from] = {
 
                                     image: { url: mediaUrl },
 
-                                    caption: "🖼️ *DOWNLOADED BY GIFT MD\n\n💫 TikTok Image Downloaded Successfully!"
+                                    caption: "🖼️ DOWNLOADED BY GIFT MD\n\n💫 TikTok Image Downloaded Successfully!"
 
                                 });
 
