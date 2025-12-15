@@ -1,8 +1,8 @@
 import { updateSetting, getSetting } from '../lib/database.js';
 
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// ━━━━━━━━━━━━━━━━━━━━━━
 // 🔧 SET OWNER NAME COMMAND
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+//━━━━━━━━━━━━━━━━━━━━━━━
 
 const setownername = {
     name: 'setownername',
@@ -22,7 +22,7 @@ const setownername = {
         // ✅ Permission check - Only owner/sudo
         if (!senderIsSudo) {
             await react('❌');
-            return await reply('⚠️ *Owner Only Command!*\n\nThis command can only be used by the bot owner.');
+            return await reply('⚠️ Owner Only Command!\n\nThis command can only be used by the bot owner.');
         }
 
         // ✅ Check if name provided
@@ -30,9 +30,9 @@ const setownername = {
             const currentOwner = getSetting('botOwner', 'Not Set');
             await react('ℹ️');
             return await reply(
-                `📝 *Current Owner Name:* ${currentOwner}\n\n` +
-                `*Usage:* .setownername <new name>\n` +
-                `*Example:* .setownername Isaac Favour`
+                `📝 Current Owner Name: ${currentOwner}\n\n` +
+                `Usage: .setownername <new name>\n` +
+                `Example: .setownername Isaac Favour`
             );
         }
 
@@ -40,7 +40,7 @@ const setownername = {
             await react('⏳');
 
             // ✅ Get new owner name from args
-            const newOwnerName = args.join(' ').trim();
+            const newOwnerName = args.slice(1).join(' ');
 
             // ✅ Validate name length
             if (newOwnerName.length < 2) {
@@ -123,7 +123,7 @@ const setbotname = {
             await react('⏳');
 
             // ✅ Get new bot name from args
-            const newBotName = args.join(' ').trim();
+            const newBotName = args.slice(1).join(' ');
 
             // ✅ Validate name length
             if (newBotName.length < 2) {
