@@ -1,4 +1,4 @@
-import {
+import { applyFontStyle, getAvailableFontStyles,
      getSetting, 
      updateSetting
 } from '../lib/database.js';
