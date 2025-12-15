@@ -1,4 +1,3 @@
-import settings from '../settings.js';
 import isAdmin from '../lib/isAdmin.js';
 import { downloadContentFromMessage } from '@whiskeysockets/baileys';
 import fs from 'fs';
@@ -358,7 +357,7 @@ Add Members Results\n\n📊 Summary:\n✅ Successfully added: ${successCount}\n�
 
             const sender = m.key.participant || m.key.remoteJid;
 
-            const isOwner = m.key.fromMe || sender.split('@')[0] === settings.ownerNumber;
+            const isOwner = m.key.fromMe || sender.split('@')[0] === global.ownerNumber;
 
             const isAdmin = groupAdmins.includes(sender);
 
@@ -388,7 +387,7 @@ Add Members Results\n\n📊 Summary:\n✅ Successfully added: ${successCount}\n�
 
                       `👑 Regular members cannot chat\n\n` +
 
-                      `Group closed by GIFT-MD BOT 🤖`
+                      `Group closed by GIFT-X 🤖`
 
             }, { quoted: m });
 
@@ -453,7 +452,7 @@ Add Members Results\n\n📊 Summary:\n✅ Successfully added: ${successCount}\n�
 
             const sender = m.key.participant || m.key.remoteJid;
 
-            const isOwner = m.key.fromMe || sender.split('@')[0] === settings.ownerNumber;
+            const isOwner = m.key.fromMe || sender.split('@')[0] === global.ownerNumber;
 
             const isAdmin = groupAdmins.includes(sender);
 
@@ -483,7 +482,7 @@ Add Members Results\n\n📊 Summary:\n✅ Successfully added: ${successCount}\n�
 
                       `👥 Everyone can participate in the chat\n\n` +
 
-                      `Group opened by GIFT-MD BOT 🤖`
+                      `Group opened by GIFT-X 🤖`
 
             }, { quoted: m });
 
@@ -645,7 +644,7 @@ Add Members Results\n\n📊 Summary:\n✅ Successfully added: ${successCount}\n�
 
             const sender = m.key.participant || m.key.remoteJid;
 
-            const isOwner = m.key.fromMe || sender.split('@')[0] === settings.ownerNumber;
+            const isOwner = m.key.fromMe || sender.split('@')[0] === global.ownerNumber;
 
             const isAdmin = groupAdmins.includes(sender);
 
@@ -671,7 +670,7 @@ Add Members Results\n\n📊 Summary:\n✅ Successfully added: ${successCount}\n�
 
             await context.reply( {
 
-                text: `🔗 Group Invite Link\n\n📝 Group: ${groupMetadata.subject}\n👥 Members: ${groupMetadata.participants.length}\n🔗 Link: ${inviteLink}\n\n⚠️ Warning: Anyone with this link can join the group!\nLink present by GIFT-MD BOT 🤖`
+                text: `🔗 Group Invite Link\n\n📝 Group: ${groupMetadata.subject}\n👥 Members: ${groupMetadata.participants.length}\n🔗 Link: ${inviteLink}\n\n⚠️ Warning: Anyone with this link can join the group!\nLink present by GIFT-X 🤖`
 
             }, { quoted: m });
 
