@@ -72,7 +72,6 @@ import { getBuffer } from '../lib/myfunc.js';
 import path from 'path';
 import sharp from 'sharp';
 import axios from 'axios';
-import settings from '../settings.js';
 import * as Jimp from 'jimp';
 import fetch from 'node-fetch';
 import fs from 'fs';
