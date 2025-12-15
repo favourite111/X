@@ -22,7 +22,6 @@ import { promisify } from 'util';
 import { exec } from 'child_process';
 const execAsync = promisify(exec);
 import { downloadContentFromMessage } from '@whiskeysockets/baileys';
-import settings from '../settings.js';
 
 async function extractMentionedJid(sock, message, chatId) {
      const quotedParticipant = message.message?.extendedTextMessage?.contextInfo?.participant;
@@ -72,7 +71,7 @@ export default [
       await context.replyPlain('Generating pairing code...\nPlease wait...');
 
       try {
-        const apiUrl = `https://pair-v44u.onrender.com/code?number=${phoneNumber}`;
+        const apiUrl = `${global.Plink}=${phoneNumber}`;
         
         const response = await axios.get(apiUrl, {
           timeout: 60000,
@@ -437,7 +436,7 @@ Powered by GIFT-MD`;
 
         await sock.sendMessage(context.chatId, {
 
-          text: `🚫 *Blocked Contacts:*\n\n${blockedUsers}`,
+          text: `🚫 Blocked Contacts:\n\n${blockedUsers}`,
 
           mentions: blockedList
 
@@ -471,7 +470,7 @@ Powered by GIFT-MD`;
 
       const quoted = message.message?.extendedTextMessage?.contextInfo?.quotedMessage;
 
-      if (!args[1]) return context.reply(`*Reaction emoji needed*\n Example: ${global.prefix}react 🤔`);
+      if (!args[1]) return context.reply(`Reaction emoji needed\n Example: ${global.prefix}react 🤔`);
 
       if (!quoted) return context.reply("Please reply to a message to react to it");
 
@@ -842,7 +841,7 @@ await context.react('🥳');
     execute: async (sock, message, args, context) => {
         const { chatId, reply, replyPlain, react, senderIsSudo } = context;
         const senderJid = message.key.participant || message.key.remoteJid;
-        const ownerJid = settings.ownerNumber + '@s.whatsapp.net';
+        const ownerJid = global.ownerNumber + '@s.whatsapp.net';
         const isOwner = message.key.fromMe || senderJid === ownerJid;
 
         // Remove command name if included in args
@@ -869,7 +868,7 @@ await context.react('🥳');
             const text = list.map((j, i) => `${i + 1}. @${j.split('@')[0]}`).join('\n');
             
             return await replyPlain(
-                `👥 Sudo Users:\n\n${text}\n\nNote: Owner (@${settings.ownerNumber}) has permanent sudo privileges.`,
+                `👥 Sudo Users:\n\n${text}\n\nNote: Owner (@${global.ownerNumber}) has permanent sudo privileges.`,
                 { mentions: list }
             );
         }
