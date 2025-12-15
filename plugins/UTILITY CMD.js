@@ -31,7 +31,7 @@ export default [
 
                 
 
-                await context.reply(`🤖 Bot Runtime\n\n⏰ Uptime: ${runtimeText}\n📅 Started: ${formatDate(Date.now() - (uptime * 1000))}`,{quoted: global.RTM});
+                await context.reply(`🤖 Bot Runtime\n\n⏰ Uptime: ${runtimeText}\n✨ Platform: ${global.server}\n📅 Started: ${formatDate(Date.now() - (uptime * 1000))}`,{quoted: global.RTM});
 
                 
 
@@ -583,7 +583,7 @@ await context.react('🥳')
                 let seconds = Math.floor(totalSeconds % 60);
                 let uptimeStr = `${days}d ${hours}h ${minutes}m ${seconds}s`;
 
-                await context.reply(`🤯 Active Time: ${uptimeStr}`, { quoted: global.upt });
+                await context.reply(`🤯 Active Time: ${uptimeStr}\n✨ Platform: ${global.server}`, { quoted: global.upt });
             } catch (e) {
                 console.error(e);
                 await context.reply('❌ Error getting uptime.');
@@ -662,6 +662,7 @@ await context.react('🥳')
 │ 6. Network (Outbound)
 │ ${netOutMB} MiB
 │
+│ 7. Platform: ${global.server}
 ╰───────────────`;
 
                 await context.reply(panel,{quoted: global.mmr});
@@ -686,7 +687,7 @@ await context.react('🥳')
             const end = Date.now();
             const speed = end - start;
 
-            const speedText = applyFontStyle(`©𝐆𝐢𝐟𝐭_𝐗 𝐒𝐩𝐞𝐞𝐝: ${speed}𝐦𝐬ツ`);
+            const speedText = applyFontStyle(`©𝐆𝐢𝐟𝐭_𝐗 𝐎𝐧:${global.server}\n𝐒𝐩𝐞𝐞𝐝:${speed}𝐦𝐬ツ`);
             await sock.sendMessage(chatId, { 
                 text: speedText, 
                 edit: sentMsg.key
