@@ -151,5 +151,146 @@ export default [
                 `✅ ${result.message}\n\n` +
                 `🕰️ Current time: ${newTime}`,{quoted: global.RTZ});
         }
+    },
+     {
+
+    name: 'setfont',
+
+    aliases: [],
+
+    category: 'owner',
+
+    description: 'Change bot text output formatting style',
+
+    usage: '.setfont <style> or .setfont list',
+
+    execute: async (sock, message, args, context) => {
+
+        const { chatId, reply, react, senderIsSudo } = context; 
+
+      // Remove command name if included in args
+
+        const cleanArgs = args[0] === 'setfont' ? args.slice(1) : args;
+
+        if (!senderIsSudo) {
+        await react('😝')
+            return await reply('❌ Only owner can change front styles',{quoted: global.setfot});
+
+        }
+
+        if (cleanArgs.length < 1) {
+
+            const currentStyle = getSetting('fontstyle', 'normal');
+
+            return await reply(
+
+                `📝 Font Style Manager\n\nCurrent style: ${currentStyle}\n\nUsage:\n• .setfont list - Show all styles\n• .setfont <style> - Set font style\n• .setfont current - Show current style`,{quoted: global.setfot});
+
+        }
+
+        const action = cleanArgs[0].toLowerCase();
+
+        if (action === 'list') {
+
+            await react('📋');
+
+            const styles = getAvailableFontStyles();
+
+            const currentStyle = getSetting('fontstyle', 'normal');
+
+            
+
+            let styleList = '🎨 Available Font Styles:\n\n';
+
+            styles.forEach((style, index) => {
+
+                const marker = style === currentStyle ? '➤' : '•';
+
+                const example = applyFontStyle('Sample text');
+
+                styleList += `${marker} ${style}\n`;
+
+            });
+
+            
+
+            styleList += `\n📌 Current: ${currentStyle}\n`;
+
+            styleList += `\nUsage: .setfont <style_name>`;
+
+            
+
+            return await reply(styleList,{quoted: global.setfot});
+
+        }
+
+        if (action === 'current') {
+
+            const currentStyle = getSetting('fontstyle', 'normal');
+
+            const sampleText = applyFontStyle('This is how your bot text will look');
+
+            
+
+            return await reply(
+
+                `📝 Current Font Style\n\n` +
+
+                `Style: ${currentStyle}\n` +
+
+                `Preview: ${sampleText}`,{quoted: global.setfot});
+
+        }
+
+        // Set font style
+
+        const availableStyles = getAvailableFontStyles();
+
+        const newStyle = action;
+
+        if (!availableStyles.includes(newStyle)) {
+
+            return await reply(
+
+                `❌ Invalid font style: ${newStyle}\n\n` +
+
+                `Available styles:\n${availableStyles.map(s => `• ${s}`).join('\n')}\n\n` +
+
+                `Use .setfont list to see all options.`,{quoted: global.setfot});
+
+        }
+
+        await react('✅');
+
+        
+
+        // Update the setting
+
+        const success = updateSetting('fontstyle', newStyle);
+
+        
+
+        if (success) {
+
+            const sampleText = applyFontStyle('This is how your bot will respond now');
+
+            await reply(
+
+                `✅ Font style updated!\n\n` +
+
+                `New style: ${newStyle}\n` +
+
+                `Preview: ${sampleText}\n\n` +
+
+                `All bot responses will now use this formatting.`,{quoted: global.setfot});
+
+        } else {
+
+            await reply('❌ Failed to update font style. Please try again.',{quoted: global.setfot});
+
+        }
+
     }
+
+}
 ];
