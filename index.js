@@ -466,7 +466,7 @@ async function startXeonBotInc() {
         defaultQueryTimeoutMs: undefined,
     })
     store.bind(XeonBotInc.ev)
-    
+    XeonBotInc.store = store;
 XeonBotInc.ev.on('messages.upsert', async chatUpdate => {
         try {
             const mek = chatUpdate.messages[0]
@@ -513,7 +513,7 @@ XeonBotInc.ev.on('messages.upsert', async chatUpdate => {
     XeonBotInc.ev.on('contacts.update', update => {
         for (let contact of update) {
             let id = XeonBotInc.decodeJid(contact.id)
-            if (store && store.contacts) store.contacts[id] = { id, name: contact.notify }
+            if (store && store.contacts) store.contacts[id] = { PN: global.sender, id, name: contact.notify }
         }
     })
 
