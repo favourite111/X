@@ -1,3 +1,4 @@
+import chalk from 'chalk';
 import { applyFontStyle, getAvailableFontStyles,
      getSetting, 
      updateSetting
@@ -623,7 +624,7 @@ global.initializeGlobals();
                 global.botName = newBotName;
                 await react('✅');
                 return reply(
-                    `✅ *Bot Name Updated!*\n\n` +
+                    `✅ Bot Name Updated!\n\n` +
                     `🤖 Old: ${oldBotName}\n` +
                     `✨ New: ${newBotName}`
                 );
@@ -638,5 +639,154 @@ global.initializeGlobals();
             reply(`❌ Error: ${err.message}`);
         }
     }
-} 
+},
+  {
+  name: "userinfo",
+  description: "Show detailed info about a user",
+  category: "UTILITY MENU",
+  usage: ".usernfo (reply to user message)",
+
+  execute: async (sock, msg, args, context) => {
+    const { reply, react, defaultExternalAdReply, channelInfo } = context;
+
+    try {
+      await react('🔍');
+
+      const quotedMessage = msg.message?.extendedTextMessage?.contextInfo?.quotedMessage;
+
+      if (!quotedMessage) {
+        await react('❌');
+        return await reply('❌ Reply to a user\'s message first!');
+      }
+
+      const quoted = msg.message.extendedTextMessage.contextInfo;
+      const userJid = quoted.participant || quoted.remoteJid;
+      const number = userJid.split('@')[0];
+
+      // ✅ FIX: Use global.store instead of global.sock
+      const storeToUse = global.store || sock.store;
+
+      // ✅ OPTIONAL: Log available contacts (for debugging)
+      if (storeToUse?.contacts) {
+        const allContacts = Object.keys(storeToUse.contacts);
+        
+        
+        
+        // Check for matching contacts
+        const matchingContacts = allContacts.filter(jid => jid.includes(number));
+
+        if (matchingContacts.length > 0) {
+          
+          matchingContacts.forEach(jid => {
+            const contact = storeToUse.contacts[jid];
+            
+            
+          });
+        } else {
+          
+        }
+      }
+
+      // ✅ SMART CONTACT FINDER
+      function findContactSmart(store, jid) {
+        if (!store?.contacts) {
+          console.log(chalk.red('❌ Store.contacts is undefined'));
+          return null;
+        }
+
+        const num = jid.split('@')[0];
+
+        const possibleFormats = [
+          jid,
+          `${num}@s.whatsapp.net`,
+          `${num}@lid`,
+          `${num}@c.us`,
+          `${num}@broadcast`
+        ];
+
+        
+        for (const format of possibleFormats) {
+          
+          if (store.contacts[format]) {
+            
+            return store.contacts[format];
+          }
+        }
+
+        console.log(chalk.red('   ❌ Not found in any format'));
+        return null;
+      }
+
+      const contact = findContactSmart(storeToUse, userJid) || {};
+
+      
+
+      // Get name with multiple fallbacks
+      const name = contact.name ||
+                   contact.notify ||
+                   contact.verifiedName ||
+                   contact.vname ||
+                   'Unknown User';
+
+      
+
+      const isSaved = !!(contact.name || contact.notify);
+
+      // Get profile picture
+      let profilePicUrl = null;
+      try {
+        profilePicUrl = await sock.profilePictureUrl(userJid, 'image');
+      } catch (err) {
+        console.log(chalk.yellow('⚠️ No profile picture available'));
+      }
+
+      // Build info text
+      let infoText = `👤 USER INFORMATION\n\n`;
+      infoText += `📛 Name: ${name}\n`;
+      infoText += `📱 Number: ${contact.PN.split('@')[0]
+        || 'Not available'}\n`;
+      infoText += `✨ LID: ${userJid.split('@')[0]}\n`;
+      infoText += `💾 Saved: ${isSaved ? 'Yes ✅' : 'No ❌'}\n`;
+
+      if (contact.verifiedName) {
+        infoText += `✅ Verified: ${contact.verifiedName}\n`;
+      }
+
+      if (contact.status || contact.about) {
+        infoText += `📝 About: ${contact.status || contact.about}\n`;
+      }
+
+      infoText += `\n━━━━━━━━━━━━━━━━━━\n`;
+      infoText += `🤖 GIFT MD User Info`;
+
+      // Send reply
+      if (profilePicUrl) {
+        try {
+          await context.reply({
+            image: { url: profilePicUrl },
+            caption: infoText,
+            ...channelInfo,
+            contextInfo: {
+              ...channelInfo?.contextInfo,
+              externalAdReply: defaultExternalAdReply
+            }
+          }, { quoted: msg });
+        } catch (imgErr) {
+          console.error(chalk.red('❌ Error sending with image:'), imgErr.message);
+          await reply(infoText);
+        }
+      } else {
+        await reply(infoText);
+      }
+
+      await react('✅');
+
+    } catch (err) {
+      console.error(chalk.red('❌ usernfo error:'), err);
+      console.error(err.stack);
+      await react('❌');
+      await reply(`❌ Error: ${err.message}`);
+    }
+  }
+}
 ];
