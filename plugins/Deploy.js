@@ -1,0 +1,44 @@
+import axios from 'axios';
+
+export default [
+ {
+   name: 'deploy',
+   aliases: ['startbot'],
+   description: 'Deploy WhatsApp bot',
+   usage: '.deploy <phone>',
+   execute: async (sock, message, args, context) => {
+     const { chatId, reply, react } = context;
+
+     try {
+       const phone = args[1];
+const session = args[2];
+
+if (!phone || !session) {
+  return reply('❌ Usage: .deploy <phone> <session>');
+}
+
+await axios.post(
+  'https://giveaway-p7i5.onrender.com/deploy',
+  {
+    phoneNumber: phone,
+    session
+  },
+    {
+           timeout: 60000,
+           headers: {
+             'Content-Type': 'application/json'
+           }
+         }
+       );
+
+       await react('✅');
+       await reply(`🚀 Deployment started!\n\nStatus: ${res.data?.status || 'OK'}`);
+
+     } catch (err) {
+       console.error('[DEPLOY]', err?.response?.data || err.message);
+       await react('❌');
+       await reply('⚠️ Deployment failed. Try again later.');
+     }
+   }
+ }
+];
