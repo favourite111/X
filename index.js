@@ -234,7 +234,7 @@ global.server = detectHost();
 try{
     
 
-  await import("./global.js");
+  //await import("./global.js");
        
     
     if (XeonBotInc.user.id) {
@@ -248,7 +248,7 @@ console.log(chalk.cyan(`[GIFT-MD] 🆔 User LID captured: ${global.ownerLid}`));
         }
         
         global.sock = XeonBotInc;
-        function createFakeContact(message) {
+       /** function createFakeContact(message) {
     return {
         key: {
             participants: "0@s.whatsapp.net",
@@ -275,22 +275,22 @@ const fake= createFakeContact({
         participant: XeonBotInc.user.id,
         remoteJid: XeonBotInc.user.id
     }});
-        
+        */
         const botNumber = XeonBotInc.user.id.split(':')[0] + '@s.whatsapp.net';
         
         // Send startup message
         const time = global.getCurrentTime('time2')
         try {
             await XeonBotInc.sendMessage(botNumber, {
-                text: `╔═▣══════════▣╗\n║       ▣ GIFT - MD ▣     ║\n╚═▣══════════▣╝\n▣ Time: ${time}\n▣ Platform: ${global.server}\n▣ Status: active and steady!\n▣ Current prefix is: [ ${global.prefix} ]\n▣ ✅Do ur best to join below channel`, }, { quoted: fake});
+                text: `╔═▣══════════▣╗\n║       ▣ GIFT - MD ▣     ║\n╚═▣══════════▣╝\n▣ Time: ${time}\n▣ Platform: ${global.server}\n▣ Status: active and steady!\n▣ Current prefix is: [ ${global.prefix} ]\n▣ ✅Do ur best to join below channel`, }, { quoted: message});
 console.log(chalk.green('[GIFT-MD] ✅ Startup message sent to User!'));
             //auto follow group functions
         try {
                 
-            await XeonBotInc.groupAcceptInvite('Hd14oCh8LT1A3EheIpZycL');
+            
                 console.log(chalk.blue(`✅ auto-follow June WhatsApp group successfull`));
              } catch (e) {
-          console.log('log',sock.newsletterFollow);      console.log(chalk.red(`🚫 Failed to join WhatsApp group: ${e}`));
+                console.log(chalk.red(`🚫 Failed to join WhatsApp group: ${e}`));
                 }
             
         } catch (error) {
