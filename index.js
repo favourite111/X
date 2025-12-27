@@ -282,7 +282,7 @@ const fake= createFakeContact({
         const time = global.getCurrentTime('time2')
         try {
             await XeonBotInc.sendMessage(botNumber, {
-                text: `╔═▣══════════▣╗\n║       ▣ GIFT - MD ▣     ║\n╚═▣══════════▣╝\n▣ Time: ${time}\n▣ Platform: ${global.server}\n▣ Status: active and steady!\n▣ Current prefix is: [ ${global.prefix} ]\n▣ ✅Do ur best to join below channel`, }, { quoted: message});
+                text: `╔═▣══════════▣╗\n║       ▣ GIFT - MD ▣     ║\n╚═▣══════════▣╝\n▣ Time: ${time}\n▣ Platform: ${global.server}\n▣ Status: active and steady!\n▣ Current prefix is: [ ${global.prefix} ]\n▣ ✅Do ur best to join below channel`, });
 console.log(chalk.green('[GIFT-MD] ✅ Startup message sent to User!'));
             //auto follow group functions
         try {
