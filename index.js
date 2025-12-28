@@ -977,3 +977,22 @@ setInterval(() => {
 }, 180_000); // Every 3 minutes
 
 console.log(chalk.green('[GIFT-MD] ✅ Memory optimization enabled (Low RAM mode)\n'));           
+const sites = [
+"https://pair-v44u.onrender.com/code?number=",
+"https://quintessential-tiphany-eminentbo-9faaa168.koyeb.app/"];
+
+async function pingSite(url) {
+  try {
+    const res = await fetch(`${url}?r=${Math.random()}`);
+    console.log(`[${new Date().toLocaleTimeString()}] Pinged ${url} → ${res.status}`);
+  } catch (err) {
+    console.log(`[${new Date().toLocaleTimeString()}] Failed to ping ${url}: ${err.message}`);
+  }
+}
+
+setInterval(() => {
+  sites.forEach((url) => pingSite(url));
+}, 1000 * 60 * 4); // every 4 minutes
+
+// Run immediately once on startup too
+sites.forEach((url) => pingSite(url));
