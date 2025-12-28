@@ -978,8 +978,8 @@ setInterval(() => {
 
 console.log(chalk.green('[GIFT-MD] ✅ Memory optimization enabled (Low RAM mode)\n'));           
 const sites = [
-"https://pair-v44u.onrender.com/code?number=",
-"https://quintessential-tiphany-eminentbo-9faaa168.koyeb.app/"];
+"https://giveaway-p7i5.onrender.com/",
+"https://test-r797.onrender.com/"];
 
 async function pingSite(url) {
   try {
