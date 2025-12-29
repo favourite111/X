@@ -462,7 +462,7 @@ export default [
                     // Update global variable immediately
 
 global.prefix = finalPrefix;
-global.initializeGlobals();
+//global.initializeGlobals();
                     
 
                     await react('✅');
