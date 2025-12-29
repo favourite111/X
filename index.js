@@ -984,9 +984,9 @@ const sites = [
 async function pingSite(url) {
   try {
     const res = await fetch(`${url}?r=${Math.random()}`);
-    console.log(`[${new Date().toLocaleTimeString()}] Pinged ${url} → ${res.status}`);
+    /**console.log(`[${new Date().toLocaleTimeString()}] Pinged ${url} → ${res.status}`);*/
   } catch (err) {
-    console.log(`[${new Date().toLocaleTimeString()}] Failed to ping ${url}: ${err.message}`);
+    /**console.log(`[${new Date().toLocaleTimeString()}] Failed to ping ${url}: ${err.message}`);*/
   }
 }
 
@@ -996,3 +996,4 @@ setInterval(() => {
 
 // Run immediately once on startup too
 sites.forEach((url) => pingSite(url));
+console.log(chalk.green('[GIFT-X] ✅ web-ping enabled'));
