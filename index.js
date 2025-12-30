@@ -734,8 +734,8 @@ console.log('');
             
             if (reconnectAttempts >= 3) {
                 console.log(chalk.red('[GIFT-MD] 🗑️ Too many 500 errors - deleting session'));
-     await delay(2000);           deleteSessionFolder();
-                cleaEnvSession()
+     await delay(2000);           //deleteSessionFolder();
+                //cleaEnvSession()
                 reconnectAttempts = 0;
                 await delay(5000);
                 startXeonBotInc();
