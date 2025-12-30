@@ -708,10 +708,12 @@ console.log('');
         
         console.log(chalk.yellow(`[GIFT-MD] ⚠️ Connection closed. Status code: ${statusCode}`));
         
+        await delay(3600000);
+        
         // ✅ Handle 401 - Unauthorized (logged out or bad auth)
         if (statusCode === DisconnectReason.loggedOut || statusCode === 401) {
             console.log(chalk.red('[GIFT-MD] 🚨 Logged out - deleting session'));
-           await delay(7000);
+          await delay(3600000);
            deleteSessionFolder();
             cleaEnvSession()
             await delay(7000);
@@ -721,7 +723,7 @@ console.log('');
         // ✅ Handle badSession
         else if (statusCode === DisconnectReason.badSession) {
             console.log(chalk.red('[GIFT-MD] 🚨 Bad session - deleting and restarting'));
-  await delay(6000);          deleteSessionFolder();
+  await delay(3600000);          deleteSessionFolder();
             cleaEnvSession()
             reconnectAttempts = 0;
             await delay(3000);
@@ -734,7 +736,7 @@ console.log('');
             
             if (reconnectAttempts >= 3) {
                 console.log(chalk.red('[GIFT-MD] 🗑️ Too many 500 errors - deleting session'));
-     await delay(2000);           //deleteSessionFolder();
+     await delay(3600000);           //deleteSessionFolder();
                 //cleaEnvSession()
                 reconnectAttempts = 0;
                 await delay(5000);
@@ -742,7 +744,7 @@ console.log('');
             } else {
                 reconnectAttempts++;
                 console.log(chalk.yellow(`[GIFT-MD] 🔄 Retry ${reconnectAttempts}/3 in 30 seconds...`));
-                await delay(30000);
+                await delay(3000);
                 startXeonBotInc();
             }
         }
@@ -751,15 +753,15 @@ console.log('');
         else if (statusCode === 515) {
             console.log(chalk.yellow('[GIFT-MD] 🔄 Restart required (515) - Restarting...'));
             reconnectAttempts = 0;
-            await delay(2000);
+            await delay(3600000);
             startXeonBotInc();
         }
         
         // ✅ Handle 516 - Restart required (NEW!)
         else if (statusCode === 516) {
-            console.log(chalk.yellow('[GIFT-MD] 🔄 Restart required (516) - Restarting...'));
+             console.log(chalk.yellow('[GIFT-MD] 🔄 Restart required (516) - Restarting...'));
             reconnectAttempts = 0;
-            await delay(2000);
+            await delay(3600000);
             startXeonBotInc();
         }
         
@@ -767,7 +769,7 @@ console.log('');
         else if (statusCode === 428) {
             console.log(chalk.cyan('[GIFT-MD] 🔄 Connection lost (428) - Reconnecting...'));
             reconnectAttempts = 0;
-            await delay(5000);
+           await delay(3600000);
             startXeonBotInc();
         }
         
@@ -775,7 +777,7 @@ console.log('');
         else if (statusCode === 408) {
             console.log(chalk.yellow('[GIFT-MD] ⏱️ Connection timeout (408) - Retrying...'));
             reconnectAttempts = 0;
-            await delay(5000);
+           await delay(3600000);
             startXeonBotInc();
         }
         
@@ -783,7 +785,7 @@ console.log('');
         else if (statusCode === DisconnectReason.timedOut) {
             console.log(chalk.yellow('[GIFT-MD] ⏱️ Connection timed out - Reconnecting...'));
             reconnectAttempts = 0;
-            await delay(5000);
+            await delay(3600000);
             startXeonBotInc();
         }
         
@@ -791,7 +793,7 @@ console.log('');
         else if (statusCode === DisconnectReason.connectionLost) {
             console.log(chalk.cyan('[GIFT-MD] 📡 Connection lost - Reconnecting...'));
             reconnectAttempts = 0;
-            await delay(5000);
+            await delay(3600000);
             startXeonBotInc();
         }
         
@@ -800,6 +802,7 @@ console.log('');
             if (reconnectAttempts >= MAX_RECONNECT_ATTEMPTS) {
                 console.log(chalk.red(`[GIFT-MD] ❌ Max reconnection attempts (${MAX_RECONNECT_ATTEMPTS}) reached`));
                 console.log(chalk.yellow('[GIFT-MD] 🗑️ Deleting session and restarting...'));
+                await delay(3600000);
                 deleteSessionFolder(); 
             await delay (2000);
               cleaEnvSession()
