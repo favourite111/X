@@ -316,6 +316,39 @@ store.readFromFile();
 // Write store every 10 seconds
 setInterval(() => store.writeToFile(), 10000);
 
+// --- NEW: Error Counter Helpers ---
+function loadErrorCount() {
+    try {
+        if (fs.existsSync(SESSION_ERROR_FILE)) {
+            const data = fs.readFileSync(SESSION_ERROR_FILE, 'utf-8');
+            return JSON.parse(data);
+        }
+    } catch (error) {
+        consol.log(`Error loading session error count: ${error.message}`, true);
+    }
+    // Structure: { count: number, last_error_timestamp: number (epoch) }
+    return { count: 0, last_error_timestamp: 0 };
+}
+
+function saveErrorCount(data) {
+    try {
+        fs.writeFileSync(SESSION_ERROR_FILE, JSON.stringify(data, null, 2));
+    } catch (error) {
+        consol.log(`Error saving session error count: ${error.message}`,true);
+    }
+}
+
+function deleteErrorCountFile() {
+    try {
+        if (fs.existsSync(SESSION_ERROR_FILE)) {
+            fs.unlinkSync(SESSION_ERROR_FILE);
+            console.log('✅ Deleted sessionErrorCount.json.');
+        }
+    } catch (e) {
+        consol.log(`Failed to delete sessionErrorCount.json: ${e.message}`, true);
+    }
+}
+
 // ✅ FIXED VERSION
 function deleteSessionFolder() {
   const sessionPath = path.join(process.cwd(), 'data', 'session', 'auth.db');  // Use process.cwd()
@@ -323,6 +356,10 @@ function deleteSessionFolder() {
   if (fs.existsSync(sessionPath)) {
     try {
       fs.rmSync(sessionPath, { recursive: true, force: true });
+        
+        deleteErrorCountFile();
+        global.errorRetryCount = 0;
+        
       console.log(chalk.green('[GIFT-MD] ✅ Session folder deleted successfully.'));
     } catch (err) {
       console.error(chalk.red('❌ Error deleting session folder:'), err);
@@ -344,11 +381,17 @@ global.devyt = "@officialGift-md";
 global.ytch = "Mr Unique Hacker";
 global.getCurrentTime = getCurrentTime;
 global.getCurrentTimezone = getCurrentTimezone;
+
+//<<<<<<<<<<<<<<<<<<>>>><><>>><>>>>>//
+global.errorRetryCount = 0;
+global.isBotConnected = false; 
+//<<<>><<<<<<<<<<<<<<<>>>>>>>>>>>>>>//
+
 global.channelLid = '120363403001461';
 const phoneNumber='238085046874';
 const pairingCode = !!phoneNumber || process.argv.includes("--pairing-code")
 const useMobile = process.argv.includes("--mobile")
-
+const SESSION_ERROR_FILE = path.join(process.cwd(), 'sessionErrorCount.json');
 // Only create readline interface if we're in an interactive environment
 const rl = process.stdin.isTTY ? readline.createInterface({ input: process.stdin, output: process.stdout }) : null
 const question = (text) => {
@@ -435,6 +478,38 @@ function parseAndSaveSession(sessionInput) {
         console.log(chalk.red(`[GIFT-MD] ❌ Failed to parse session: ${error.message}`));
         return false;
     }
+}
+
+
+
+async function handle408Error(statusCode) {
+    // Only proceed for 408 Timeout errors
+    if (statusCode !== DisconnectReason.connectionTimeout) return false;
+    
+    global.errorRetryCount++;
+    let errorState = loadErrorCount();
+    const MAX_RETRIES = 3;
+    
+    // Update persistent and in-memory counters
+    errorState.count = global.errorRetryCount;
+    errorState.last_error_timestamp = Date.now();
+    saveErrorCount(errorState);
+
+   console.log(`Connection Timeout (408) detected. Retry count: ${global.errorRetryCount}/${MAX_RETRIES}`);
+    
+    if (global.errorRetryCount >= MAX_RETRIES) {
+        console.log(chalk.white.bgRed(`[MAX CONNECTION TIMEOUTS] (${MAX_RETRIES}) REACHED IN ACTIVE STATE. `));
+        console.log(chalk.white.bgRed('This indicates a persistent network or session issue.'));
+       console.log(chalk.white.bgRed('Exiting process to stop infinite restart loop.'));
+
+        deleteErrorCountFile();
+        global.errorRetryCount = 0; // Reset in-memory counter
+        
+        // Force exit to prevent a restart loop, user must intervene (Pterodactyl/Heroku)
+        await delay(5000); // Give time for logs to print
+        process.exit(1);
+    }
+    return true;
 }
 
 
@@ -687,8 +762,42 @@ const MAX_RECONNECT_ATTEMPTS = 5;
 // Connection handling
 XeonBotInc.ev.on('connection.update', async (s) => {
     const { connection, lastDisconnect } = s
-    
-    if (connection == "open") {
+
+    if (connection === 'close') {
+            global.isBotConnected = false; 
+            
+            const statusCode = lastDisconnect?.error?.output?.statusCode;
+            // Capture both DisconnectReason.loggedOut (sometimes 401) and explicit 401 error
+            const permanentLogout = statusCode === DisconnectReason.loggedOut || statusCode === 401;
+            
+            // Log and handle permanent errors (logged out, invalid session)
+            if (permanentLogout) {
+                console.log(chalk.bgRed.black(`\n\n🚨 WhatsApp Disconnected! Status Code: ${statusCode} (LOGGED OUT / INVALID SESSION).`));
+                console.log('🗑️ Deleting session folder and forcing a clean restart...');
+                
+                // AUTOMATICALLY DELETE SESSION (using the new helper)
+                clearSessionFiles();
+                
+                console.log('✅ Session, login preference, and error count cleaned. Initiating full process restart in 5 seconds...');
+                await delay(5000);
+                
+                // CRITICAL FIX: Use process.exit(1) to trigger a clean restart by the Daemon
+                process.exit(1); 
+                
+            } else {
+                // NEW: Handle the 408 Timeout Logic FIRST
+                const is408Handled = await handle408Error(statusCode);
+                if (is408Handled) {
+                    // If handle408Error decides to exit, it will already have called process.exit(1)
+                    return;
+                }
+
+                // This handles all other temporary errors (Stream, Connection, Timeout, etc.)
+                console.log(`Connection closed due to temporary issue (Status: ${statusCode}). Attempting reconnect..`);
+                // Re-start the whole bot process (this handles temporary errors/reconnects)
+                startXeonBotInc(); 
+            }
+    } else if (connection == "open") {
         console.log(chalk.gray('┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓'))
         console.log(chalk.gray('┃') + chalk.green.bold('        ✅ CONNECTION UPDATING..!     ') + chalk.gray('  ┃'))
         console.log(chalk.gray('┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛'))    
@@ -700,123 +809,7 @@ console.log(chalk.cyan(`[GIFT-MD] 📦 Node: ${process.version}`));
 console.log(chalk.cyan(`[GIFT-MD] 📦 Baileys version: ${baileysPkg.version}\n`));
 console.log('');
         
-}
-    
-   
-    if (connection === 'close') {
-        const statusCode = lastDisconnect?.error?.output?.statusCode;
-        
-        console.log(chalk.yellow(`[GIFT-MD] ⚠️ Connection closed. Status code: ${statusCode}`));
-        
-        await delay(3600000);
-        
-        // ✅ Handle 401 - Unauthorized (logged out or bad auth)
-        if (statusCode === DisconnectReason.loggedOut || statusCode === 401) {
-            console.log(chalk.red('[GIFT-MD] 🚨 Logged out - deleting session'));
-          await delay(3600000);
-           deleteSessionFolder();
-            cleaEnvSession()
-            await delay(7000);
-            process.exit(0);
-        } 
-        
-        // ✅ Handle badSession
-        else if (statusCode === DisconnectReason.badSession) {
-            console.log(chalk.red('[GIFT-MD] 🚨 Bad session - deleting and restarting'));
-  await delay(3600000);          deleteSessionFolder();
-            cleaEnvSession()
-            reconnectAttempts = 0;
-            await delay(3000);
-            startXeonBotInc();
-        }
-        
-        // ✅ Handle 500 - Internal Server Error
-        else if (statusCode === 500) {
-            console.log(chalk.red('[GIFT-MD] 🚨 Server error (500) - Session may be corrupted'));
-            
-            if (reconnectAttempts >= 3) {
-                console.log(chalk.red('[GIFT-MD] 🗑️ Too many 500 errors - deleting session'));
-     await delay(3600000);           //deleteSessionFolder();
-                //cleaEnvSession()
-                reconnectAttempts = 0;
-                await delay(5000);
-                startXeonBotInc();
-            } else {
-                reconnectAttempts++;
-                console.log(chalk.yellow(`[GIFT-MD] 🔄 Retry ${reconnectAttempts}/3 in 30 seconds...`));
-                await delay(3000);
-                startXeonBotInc();
-            }
-        }
-        
-        // ✅ Handle 515 - Restart required (old code)
-        else if (statusCode === 515) {
-            console.log(chalk.yellow('[GIFT-MD] 🔄 Restart required (515) - Restarting...'));
-            reconnectAttempts = 0;
-            await delay(3600000);
-            startXeonBotInc();
-        }
-        
-        // ✅ Handle 516 - Restart required (NEW!)
-        else if (statusCode === 516) {
-             console.log(chalk.yellow('[GIFT-MD] 🔄 Restart required (516) - Restarting...'));
-            reconnectAttempts = 0;
-            await delay(3600000);
-            startXeonBotInc();
-        }
-        
-        // ✅ Handle 428 - Connection closed (normal)
-        else if (statusCode === 428) {
-            console.log(chalk.cyan('[GIFT-MD] 🔄 Connection lost (428) - Reconnecting...'));
-            reconnectAttempts = 0;
-           await delay(3600000);
-            startXeonBotInc();
-        }
-        
-        // ✅ Handle 408 - Timeout
-        else if (statusCode === 408) {
-            console.log(chalk.yellow('[GIFT-MD] ⏱️ Connection timeout (408) - Retrying...'));
-            reconnectAttempts = 0;
-           await delay(3600000);
-            startXeonBotInc();
-        }
-        
-        // ✅ Handle timedOut
-        else if (statusCode === DisconnectReason.timedOut) {
-            console.log(chalk.yellow('[GIFT-MD] ⏱️ Connection timed out - Reconnecting...'));
-            reconnectAttempts = 0;
-            await delay(3600000);
-            startXeonBotInc();
-        }
-        
-        // ✅ Handle connectionLost
-        else if (statusCode === DisconnectReason.connectionLost) {
-            console.log(chalk.cyan('[GIFT-MD] 📡 Connection lost - Reconnecting...'));
-            reconnectAttempts = 0;
-            await delay(3600000);
-            startXeonBotInc();
-        }
-        
-        // ✅ Handle all other errors
-        else {
-            if (reconnectAttempts >= MAX_RECONNECT_ATTEMPTS) {
-                console.log(chalk.red(`[GIFT-MD] ❌ Max reconnection attempts (${MAX_RECONNECT_ATTEMPTS}) reached`));
-                console.log(chalk.yellow('[GIFT-MD] 🗑️ Deleting session and restarting...'));
-                await delay(3600000);
-                deleteSessionFolder(); 
-            await delay (2000);
-              cleaEnvSession()
-                reconnectAttempts = 0;
-                await delay(5000);
-                startXeonBotInc();
-            } else {
-                reconnectAttempts++;
-                console.log(chalk.cyan(`[GIFT-MD] 🔄 Reconnecting... (Attempt ${reconnectAttempts}/${MAX_RECONNECT_ATTEMPTS})`));
-                await delay(10000);
-                startXeonBotInc();
-            }
-        }
-    }
+}                   
 });
     
     
